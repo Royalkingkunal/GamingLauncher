@@ -22,14 +22,10 @@ class BatteryMonitor(private val context: Context) {
     fun getBatterySnapshot(): BatterySnapshot {
         try {
             val intentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-            val batteryStatus: Intent? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                try {
-                    context.registerReceiver(null, intentFilter, Context.RECEIVER_NOT_EXPORTED)
-                } catch (_: Throwable) {
-                    context.registerReceiver(null, intentFilter)
-                }
-            } else {
+            val batteryStatus: Intent? = try {
                 context.registerReceiver(null, intentFilter)
+            } catch (_: Throwable) {
+                null
             }
 
             val tempTenths = batteryStatus?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0

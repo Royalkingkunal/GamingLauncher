@@ -39,6 +39,16 @@ class GamingApp : Application() {
         instance = this
 
         try {
+            val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+            Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+                try {
+                    android.util.Log.e("GamingLauncher", "FATAL on thread ${thread.name}: ${throwable.message}", throwable)
+                } catch (_: Throwable) {}
+                defaultHandler?.uncaughtException(thread, throwable)
+            }
+        } catch (_: Throwable) {}
+
+        try {
             createNotificationChannels()
         } catch (_: Throwable) {}
     }

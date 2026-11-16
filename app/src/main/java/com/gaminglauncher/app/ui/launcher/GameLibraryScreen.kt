@@ -564,9 +564,6 @@ fun EmptyGamesState(onAddClick: () -> Unit) {
 private fun drawableToBitmap(drawable: Drawable?): Bitmap? {
     if (drawable == null) return null
     try {
-        if (drawable is BitmapDrawable && drawable.bitmap != null) {
-            return drawable.bitmap
-        }
         val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 96
         val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 96
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

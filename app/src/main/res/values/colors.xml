@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="amoled_black">#05080E</color>
+    <color name="amoled_dark_card">#0B121E</color>
+    <color name="amoled_surface">#101A2B</color>
+    <color name="amoled_card_border">#1E2D4A</color>
+    <color name="neon_cyan">#00F2FE</color>
+    <color name="cyber_green">#00F5A0</color>
+    <color name="electric_purple">#9D4EDD</color>
+    <color name="alert_red">#FF0055</color>
+</resources>

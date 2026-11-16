@@ -45,7 +45,7 @@ class CpuMonitor {
                     }
                 }
             }
-        } catch (_: Exception) {}
+        } catch (_: Throwable) {}
 
         // Fallback: estimate from thread usage and core counts
         val cores = Runtime.getRuntime().availableProcessors()
