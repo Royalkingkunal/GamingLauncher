@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
         try {
             setContent {
                 GamingLauncherTheme {
-                    val app = GamingApp.instance ?: (applicationContext as? GamingApp) ?: remember { GamingApp() }
+                    val app = GamingApp.instance
 
                     val launcherViewModel = remember { LauncherViewModel(app.gameRepository) }
                     val boosterViewModel = remember { BoosterViewModel() }

@@ -20,8 +20,7 @@ class GamingApp : Application() {
         const val CHANNEL_ID_GAMING_SESSION = "gaming_session_channel"
         const val CHANNEL_ID_OVERLAY = "gaming_overlay_channel"
 
-        @Volatile
-        var instance: GamingApp? = null
+        lateinit var instance: GamingApp
             private set
     }
 
