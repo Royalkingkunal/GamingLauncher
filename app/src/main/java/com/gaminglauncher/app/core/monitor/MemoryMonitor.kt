@@ -16,6 +16,7 @@ class MemoryMonitor(private val context: Context) {
         val usagePercentage: Int
     ) {
         val percentageUsed: Int get() = usagePercentage
+        val availMb: Long get() = availableMb
     }
 
     data class BoostResult(
