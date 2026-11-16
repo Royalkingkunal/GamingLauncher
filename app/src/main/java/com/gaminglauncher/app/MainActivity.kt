@@ -42,73 +42,86 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        checkNotificationPermission()
+        try {
+            checkNotificationPermission()
+        } catch (_: Throwable) {}
 
-        setContent {
-            GamingLauncherTheme {
-                val app = GamingApp.instance
+        try {
+            setContent {
+                GamingLauncherTheme {
+                    val app = GamingApp.instance ?: (applicationContext as? GamingApp) ?: remember { GamingApp() }
 
-                val launcherViewModel = remember { LauncherViewModel(app.gameRepository) }
-                val boosterViewModel: BoosterViewModel = viewModel()
-                val networkViewModel: NetworkViewModel = viewModel()
-                val hudViewModel: HudViewModel = viewModel()
+                    val launcherViewModel = remember { LauncherViewModel(app.gameRepository) }
+                    val boosterViewModel = remember { BoosterViewModel() }
+                    val networkViewModel = remember { NetworkViewModel() }
+                    val hudViewModel = remember { HudViewModel() }
 
-                var currentScreen by remember { mutableStateOf<Screen>(Screen.Library) }
+                    var currentScreen by remember { mutableStateOf<Screen>(Screen.Library) }
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    containerColor = AmoledBlack,
-                    bottomBar = {
-                        NavigationBar(
-                            containerColor = AmoledDarkCard,
-                            tonalElevation = 8.dp
-                        ) {
-                            Screen.items.forEach { screen ->
-                                val selected = currentScreen == screen
-                                NavigationBarItem(
-                                    selected = selected,
-                                    onClick = { currentScreen = screen },
-                                    icon = {
-                                        Icon(
-                                            screen.icon,
-                                            contentDescription = screen.title,
-                                            modifier = Modifier.size(22.dp)
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        containerColor = AmoledBlack,
+                        bottomBar = {
+                            NavigationBar(
+                                containerColor = AmoledDarkCard,
+                                tonalElevation = 8.dp
+                            ) {
+                                Screen.items.forEach { screen ->
+                                    val selected = currentScreen == screen
+                                    NavigationBarItem(
+                                        selected = selected,
+                                        onClick = { currentScreen = screen },
+                                        icon = {
+                                            Icon(
+                                                screen.icon,
+                                                contentDescription = screen.title,
+                                                modifier = Modifier.size(22.dp)
+                                            )
+                                        },
+                                        label = {
+                                            Text(
+                                                screen.title,
+                                                fontSize = 10.sp,
+                                                color = if (selected) NeonCyan else TextMuted
+                                            )
+                                        },
+                                        colors = NavigationBarItemDefaults.colors(
+                                            selectedIconColor = NeonCyan,
+                                            unselectedIconColor = TextMuted,
+                                            indicatorColor = AmoledSurface
                                         )
-                                    },
-                                    label = {
-                                        Text(
-                                            screen.title,
-                                            fontSize = 10.sp,
-                                            color = if (selected) NeonCyan else TextMuted
-                                        )
-                                    },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = NeonCyan,
-                                        unselectedIconColor = TextMuted,
-                                        indicatorColor = AmoledSurface
                                     )
-                                )
+                                }
                             }
                         }
-                    }
-                ) { innerPadding ->
-                    Crossfade(
-                        targetState = currentScreen,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        label = "ScreenTransition"
-                    ) { screen ->
-                        when (screen) {
-                            Screen.Library -> GameLibraryScreen(viewModel = launcherViewModel)
-                            Screen.Booster -> PerformanceDashboardScreen(viewModel = boosterViewModel)
-                            Screen.Network -> NetworkBoosterScreen(viewModel = networkViewModel)
-                            Screen.TouchHud -> TouchControlsScreen(viewModel = hudViewModel)
-                            Screen.Settings -> SettingsScreen()
+                    ) { innerPadding ->
+                        Crossfade(
+                            targetState = currentScreen,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding),
+                            label = "ScreenTransition"
+                        ) { screen ->
+                            when (screen) {
+                                Screen.Library -> GameLibraryScreen(viewModel = launcherViewModel)
+                                Screen.Booster -> PerformanceDashboardScreen(viewModel = boosterViewModel)
+                                Screen.Network -> NetworkBoosterScreen(viewModel = networkViewModel)
+                                Screen.TouchHud -> TouchControlsScreen(viewModel = hudViewModel)
+                                Screen.Settings -> SettingsScreen()
+                            }
                         }
                     }
                 }
             }
+        } catch (e: Throwable) {
+            val tv = android.widget.TextView(this).apply {
+                text = "Gaming Launcher Ready"
+                setTextColor(android.graphics.Color.CYAN)
+                setBackgroundColor(android.graphics.Color.BLACK)
+                textSize = 18f
+                setPadding(50, 100, 50, 50)
+            }
+            setContentView(tv)
         }
     }
 

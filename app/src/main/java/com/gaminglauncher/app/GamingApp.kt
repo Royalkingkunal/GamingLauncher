@@ -20,28 +20,20 @@ class GamingApp : Application() {
         const val CHANNEL_ID_GAMING_SESSION = "gaming_session_channel"
         const val CHANNEL_ID_OVERLAY = "gaming_overlay_channel"
 
-        lateinit var instance: GamingApp
+        @Volatile
+        var instance: GamingApp? = null
             private set
     }
 
-    lateinit var memoryMonitor: MemoryMonitor
-        private set
-    lateinit var cpuMonitor: CpuMonitor
-        private set
-    lateinit var batteryMonitor: BatteryMonitor
-        private set
-    lateinit var displayMonitor: DisplayMonitor
-        private set
-    lateinit var pingService: PingService
-        private set
-    lateinit var wifiManager: LowLatencyWifiManager
-        private set
-    lateinit var gameStorage: GameProfileStorage
-        private set
-    lateinit var gameDetector: GameDetector
-        private set
-    lateinit var gameRepository: GameRepository
-        private set
+    val memoryMonitor: MemoryMonitor by lazy { MemoryMonitor(this) }
+    val cpuMonitor: CpuMonitor by lazy { CpuMonitor() }
+    val batteryMonitor: BatteryMonitor by lazy { BatteryMonitor(this) }
+    val displayMonitor: DisplayMonitor by lazy { DisplayMonitor(this) }
+    val pingService: PingService by lazy { PingService() }
+    val wifiManager: LowLatencyWifiManager by lazy { LowLatencyWifiManager(this) }
+    val gameStorage: GameProfileStorage by lazy { GameProfileStorage(this) }
+    val gameDetector: GameDetector by lazy { GameDetector(this, gameStorage) }
+    val gameRepository: GameRepository by lazy { GameRepository(this, gameDetector, gameStorage) }
 
     override fun onCreate() {
         super.onCreate()
@@ -50,16 +42,6 @@ class GamingApp : Application() {
         try {
             createNotificationChannels()
         } catch (_: Throwable) {}
-
-        memoryMonitor = MemoryMonitor(this)
-        cpuMonitor = CpuMonitor()
-        batteryMonitor = BatteryMonitor(this)
-        displayMonitor = DisplayMonitor(this)
-        pingService = PingService()
-        wifiManager = LowLatencyWifiManager(this)
-        gameStorage = GameProfileStorage(this)
-        gameDetector = GameDetector(this, gameStorage)
-        gameRepository = GameRepository(this, gameDetector, gameStorage)
     }
 
     private fun createNotificationChannels() {

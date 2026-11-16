@@ -54,7 +54,12 @@
         <!-- Floating HUD Overlay Service -->
         <service
             android:name=".core.service.GamingOverlayService"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="gaming_overlay_floating_hud" />
+        </service>
 
         <!-- Foreground Game Detection & Optimization Service -->
         <service

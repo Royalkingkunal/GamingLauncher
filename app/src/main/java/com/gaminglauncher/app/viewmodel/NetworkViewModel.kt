@@ -15,7 +15,7 @@ import kotlinx.coroutines.withContext
 
 class NetworkViewModel : ViewModel() {
 
-    private val app = GamingApp.instance
+    private val app: GamingApp get() = GamingApp.instance ?: GamingApp()
 
     private val _networkStats = MutableStateFlow(NetworkStats())
     val networkStats: StateFlow<NetworkStats> = _networkStats.asStateFlow()

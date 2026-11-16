@@ -15,7 +15,7 @@ import kotlinx.coroutines.withContext
 
 class BoosterViewModel : ViewModel() {
 
-    private val app = GamingApp.instance
+    private val app: GamingApp get() = GamingApp.instance ?: GamingApp()
 
     private val _metrics = MutableStateFlow(PerformanceMetrics())
     val metrics: StateFlow<PerformanceMetrics> = _metrics.asStateFlow()
