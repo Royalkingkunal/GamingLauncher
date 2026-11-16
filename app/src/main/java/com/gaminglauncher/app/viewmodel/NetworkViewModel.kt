@@ -33,38 +33,40 @@ class NetworkViewModel : ViewModel() {
     private fun startNetworkMonitoring() {
         viewModelScope.launch(Dispatchers.Default) {
             while (isActive) {
-                if (_isMonitoring.value) {
-                    val pingResult = withContext(Dispatchers.IO) {
-                        app.pingService.measurePing(1000)
+                try {
+                    if (_isMonitoring.value) {
+                        val pingResult = withContext(Dispatchers.IO) {
+                            app.pingService.measurePing(1000)
+                        }
+
+                        val wifiDetails = app.wifiManager.getNetworkDetails()
+
+                        // Calculate stability score (100 is perfect)
+                        val lossPenalty = pingResult.packetLossPercent * 2
+                        val jitterPenalty = (pingResult.jitterMs / 3).toInt()
+                        val latencyPenalty = if (pingResult.latencyMs > 100) ((pingResult.latencyMs - 100) / 10).toInt() else 0
+                        val stability = (100 - lossPenalty - jitterPenalty - latencyPenalty).coerceIn(10, 100)
+
+                        _networkStats.value = NetworkStats(
+                            pingMs = pingResult.latencyMs,
+                            jitterMs = pingResult.jitterMs,
+                            packetLossPercent = pingResult.packetLossPercent,
+                            networkType = wifiDetails.type,
+                            wifiLinkSpeedMbps = wifiDetails.linkSpeedMbps,
+                            wifiFrequencyBand = wifiDetails.frequencyBand,
+                            wifiRssi = wifiDetails.rssi,
+                            stabilityScore = stability,
+                            isLowLatencyLockActive = wifiDetails.isLowLatencyActive,
+                            recommendation = wifiDetails.recommendation
+                        )
+
+                        // Keep last 20 ping values for sparkline
+                        val currentList = _pingHistory.value.toMutableList()
+                        if (currentList.size >= 20) currentList.removeAt(0)
+                        currentList.add(pingResult.latencyMs)
+                        _pingHistory.value = currentList
                     }
-
-                    val wifiDetails = app.wifiManager.getNetworkDetails()
-
-                    // Calculate stability score (100 is perfect)
-                    val lossPenalty = pingResult.packetLossPercent * 2
-                    val jitterPenalty = (pingResult.jitterMs / 3).toInt()
-                    val latencyPenalty = if (pingResult.latencyMs > 100) ((pingResult.latencyMs - 100) / 10).toInt() else 0
-                    val stability = (100 - lossPenalty - jitterPenalty - latencyPenalty).coerceIn(10, 100)
-
-                    _networkStats.value = NetworkStats(
-                        pingMs = pingResult.latencyMs,
-                        jitterMs = pingResult.jitterMs,
-                        packetLossPercent = pingResult.packetLossPercent,
-                        networkType = wifiDetails.type,
-                        wifiLinkSpeedMbps = wifiDetails.linkSpeedMbps,
-                        wifiFrequencyBand = wifiDetails.frequencyBand,
-                        wifiRssi = wifiDetails.rssi,
-                        stabilityScore = stability,
-                        isLowLatencyLockActive = wifiDetails.isLowLatencyActive,
-                        recommendation = wifiDetails.recommendation
-                    )
-
-                    // Keep last 20 ping values for sparkline
-                    val currentList = _pingHistory.value.toMutableList()
-                    if (currentList.size >= 20) currentList.removeAt(0)
-                    currentList.add(pingResult.latencyMs)
-                    _pingHistory.value = currentList
-                }
+                } catch (_: Throwable) {}
 
                 delay(1200)
             }

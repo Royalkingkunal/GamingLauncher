@@ -45,7 +45,9 @@ class LauncherViewModel(
 
     fun refreshGames() {
         viewModelScope.launch {
-            repository.refreshGames()
+            try {
+                repository.refreshGames()
+            } catch (_: Throwable) {}
         }
     }
 

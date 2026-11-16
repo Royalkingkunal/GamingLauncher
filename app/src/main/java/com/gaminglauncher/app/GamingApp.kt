@@ -47,7 +47,9 @@ class GamingApp : Application() {
         super.onCreate()
         instance = this
 
-        createNotificationChannels()
+        try {
+            createNotificationChannels()
+        } catch (_: Throwable) {}
 
         memoryMonitor = MemoryMonitor(this)
         cpuMonitor = CpuMonitor()
@@ -62,7 +64,7 @@ class GamingApp : Application() {
 
     private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = getSystemService(NotificationManager::class.java)
+            val notificationManager = getSystemService(NotificationManager::class.java) ?: return
 
             val sessionChannel = NotificationChannel(
                 CHANNEL_ID_GAMING_SESSION,

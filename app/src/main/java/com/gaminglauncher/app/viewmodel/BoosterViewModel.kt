@@ -32,26 +32,27 @@ class BoosterViewModel : ViewModel() {
 
     private fun startHardwarePolling() {
         viewModelScope.launch(Dispatchers.Default) {
-            val displayInfo = app.displayMonitor.getDisplayRefreshRateInfo()
-
             while (isActive) {
-                val mem = app.memoryMonitor.getMemorySnapshot()
-                val cpu = app.cpuMonitor.sampleCpuUsage()
-                val battery = app.batteryMonitor.getBatteryStatus()
+                try {
+                    val displayInfo = app.displayMonitor.getDisplayRefreshRateInfo()
+                    val mem = app.memoryMonitor.getMemorySnapshot()
+                    val cpu = app.cpuMonitor.sampleCpuUsage()
+                    val battery = app.batteryMonitor.getBatteryStatus()
 
-                _metrics.value = PerformanceMetrics(
-                    totalRamMb = mem.totalMb,
-                    availableRamMb = mem.availMb,
-                    usedRamMb = mem.usedMb,
-                    ramUsagePercent = mem.usagePercentage,
-                    cpuLoadPercent = cpu,
-                    batteryTemperatureC = battery.temperatureCelsius,
-                    batteryLevel = battery.level,
-                    isBatteryCharging = battery.isCharging,
-                    displayRefreshRate = displayInfo.currentRefreshRate,
-                    supportedRefreshRates = displayInfo.supportedRefreshRates,
-                    thermalStatus = battery.thermalStatus
-                )
+                    _metrics.value = PerformanceMetrics(
+                        totalRamMb = mem.totalMb,
+                        availableRamMb = mem.availMb,
+                        usedRamMb = mem.usedMb,
+                        ramUsagePercent = mem.usagePercentage,
+                        cpuLoadPercent = cpu,
+                        batteryTemperatureC = battery.temperatureCelsius,
+                        batteryLevel = battery.level,
+                        isBatteryCharging = battery.isCharging,
+                        displayRefreshRate = displayInfo.currentRefreshRate,
+                        supportedRefreshRates = displayInfo.supportedRefreshRates,
+                        thermalStatus = battery.thermalStatus
+                    )
+                } catch (_: Throwable) {}
 
                 delay(1500)
             }

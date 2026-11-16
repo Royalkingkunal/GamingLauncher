@@ -1,9 +1,9 @@
 package com.gaminglauncher.app.core.monitor
 
 import android.content.Context
+import android.hardware.display.DisplayManager
 import android.os.Build
 import android.view.Display
-import android.view.WindowManager
 
 class DisplayMonitor(private val context: Context) {
 
@@ -17,35 +17,35 @@ class DisplayMonitor(private val context: Context) {
     fun getDisplayRefreshRateInfo(): DisplayCapabilities = getDisplayCapabilities()
 
     fun getDisplayCapabilities(): DisplayCapabilities {
-        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
+        try {
+            val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
+            val display: Display? = displayManager?.getDisplay(Display.DEFAULT_DISPLAY)
 
-        @Suppress("DEPRECATION")
-        val display: Display? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                context.display
-            } catch (_: Exception) {
-                windowManager?.defaultDisplay
-            }
-        } else {
-            windowManager?.defaultDisplay
+            val mode = display?.mode
+            val currentRate = mode?.refreshRate ?: 60f
+            val width = mode?.physicalWidth ?: 1080
+            val height = mode?.physicalHeight ?: 2400
+
+            val supportedModes = display?.supportedModes ?: emptyArray()
+            val supportedRates = supportedModes.map { it.refreshRate }
+                .filter { it > 0f }
+                .distinct()
+                .sorted()
+                .ifEmpty { listOf(60f) }
+
+            return DisplayCapabilities(
+                currentRefreshRate = if (currentRate > 0f) currentRate else 60f,
+                supportedRefreshRates = supportedRates,
+                resolutionWidth = width,
+                resolutionHeight = height
+            )
+        } catch (_: Throwable) {
+            return DisplayCapabilities(
+                currentRefreshRate = 60f,
+                supportedRefreshRates = listOf(60f),
+                resolutionWidth = 1080,
+                resolutionHeight = 2400
+            )
         }
-
-        val mode = display?.mode
-        val currentRate = mode?.refreshRate ?: 60f
-        val width = mode?.physicalWidth ?: 1080
-        val height = mode?.physicalHeight ?: 2400
-
-        val supportedModes = display?.supportedModes ?: emptyArray()
-        val supportedRates = supportedModes.map { it.refreshRate }
-            .distinct()
-            .sorted()
-            .ifEmpty { listOf(60f) }
-
-        return DisplayCapabilities(
-            currentRefreshRate = currentRate,
-            supportedRefreshRates = supportedRates,
-            resolutionWidth = width,
-            resolutionHeight = height
-        )
     }
 }

@@ -34,10 +34,14 @@ fun SettingsScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    var hasOverlayPermission by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
+    var hasOverlayPermission by remember {
+        mutableStateOf(try { Settings.canDrawOverlays(context) } catch (_: Throwable) { false })
+    }
     var hasDndPermission by remember {
-        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mutableStateOf(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) nm.isNotificationPolicyAccessGranted else true)
+        mutableStateOf(try {
+            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) nm?.isNotificationPolicyAccessGranted == true else true
+        } catch (_: Throwable) { false })
     }
 
     Column(
